@@ -1,0 +1,331 @@
+<head>
+
+<SCRIPT LANGUAGE="JavaScript" SRC="SweeperGameFile.js">  </SCRIPT>    <!-- Includes Game file-->
+
+
+    <!--YOUR CODE-->
+<script>
+//0 = unmarked, 1 = marked as clean, 2 = blocked
+//Somehow push those values in the array.
+var placeArray;
+function Create2DArray(rows) {
+  var arr = new Array(10);
+
+  for (var i=0;i<rows;i++) {
+     arr[i] = [0,0,0,0,0,0,0,0,0,0];
+     
+  }
+
+  return arr;
+  fill();
+}
+
+function fill()
+{
+    for (var j =0; j < 10; j++)
+    {
+        for (var i =0; i < 10; i++)
+        {
+            placeArray[j][i] = 0;
+        }
+    }
+}
+var placeArray = Create2DArray(10);
+var duplicateArray = Create2DArray(10);
+var i = 0;
+function Sweeper(){
+this.x=0;  //Starting X position(0-9)
+this.y=0; //Starting Y position (0-9)
+this.totalMoves=0;  //Do not change
+
+this.direction = 'Down';  //Your initial Direction
+
+
+this.move=function(){
+    if (!this.nextToTopWall() && this.obstacleAbove())
+    {
+        placeArray[this.x][this.y-1]=2;
+    }
+    else if (!this.nextToRightWall() && this.obstacleOnRight())
+    {
+        placeArray[this.x+1][this.y]=2;
+    }
+    else if (!this.nextToLeftWall() && this.obstacleOnLeft())
+    {
+        placeArray[this.x-1][this.y]=2;
+    } 
+    else if (!this.nextToBottomWall() && this.obstacleBelow())
+    {
+        placeArray[this.x][this.y+1]=2;
+    }
+
+
+
+this.totalMoves++;
+
+    //if the above square is dirty, move to that square
+    if(this.isAboveDirty()){
+        this.direction='Up';
+        placeArray[this.x][this.y-1]=1;
+       return this.direction;
+    }
+    else if (this.isBelowDirty()){
+        this.direction='Down';
+        placeArray[this.x][this.y+1]=1;
+        return this.direction;
+    }
+    else if (this.isLeftDirty()){
+        this.direction='Left';
+        placeArray[this.x-1][this.y]=1;
+        return this.direction;
+    }
+    else if (this.isRightDirty()){
+        this.direction='Right';
+        placeArray[this.x+1][this.y]=1;
+        return this.direction;
+    }
+    //if the square you are on is clean, then see if above is dirty.
+    if(duplicateArray[this.x][this.y] ==2)
+    {
+        console.log("hi");
+        for (var j =0; j < 10; j++)
+        {
+            for (var i =0; i < 10; i++)
+            {
+                if (placeArray[j][i] ==0)
+                {
+                    console.log("array = 0");
+                    console.log(this.x+" "+this.y)
+                    console.log(j+" "+ i);
+                    if (j < this.x)
+                    {
+                        if (this.obstacleOnLeft()){break;}
+                        this.direction = 'Left';
+
+                        return this.direction;
+                    }
+                    else if (j > this.x)
+                        {
+
+                            if (this.obstacleOnRight())
+                                {break;}
+                            this.direction = 'Right';
+                            
+                            return this.direction;
+                        }
+    
+                    if (i < this.y)
+                    {
+                        if (this.obstacleAbove()){break;}
+                        this.direction = 'Up';
+                        
+                        return this.direction;
+                    }
+                    else if (i > this.y)
+                    {
+                        if (this.obstacleBelow())
+                            {break;}
+                        this.direction = 'Down';
+                        
+                        return this.direction;
+                    }
+                }
+            }
+        }
+
+    }
+
+var r = this.totalMoves%100;
+    if(r>90)this.moveRandom();
+
+
+    //for fun.. move random occasionally..10 times out of 100
+
+
+//If you are moving right......
+if(this.direction=='Right'){
+    if (duplicateArray[this.x][this.y] <= 1)
+    {
+    duplicateArray[this.x][this.y] += 1;
+    }
+   if((this.nextToRightWall())||(this.obstacleOnRight())){
+      placeArray[this.x+1][this.y] = 2;
+    
+      this.direction='Down';//If there is an obstacle to the right, go Down.
+
+     if((this.obstacleBelow())||(this.nextToBottomWall())){
+     this.direction='Up';
+    placeArray[this.x][this.y+1] = 2;}  //If you can't go Down, go Up.
+
+     if((this.obstacleAbove())||(this.nextToTopWall())){this.direction='Left'; 
+     placeArray[this.x][this.y-1] = 2;}  //If you can't go Up or Down, go Left.
+}
+    return this.direction;  //Keeps you moving right or returns new direction
+}
+
+//If you are moving left......
+    if(this.direction=='Left'){
+        if (duplicateArray[this.x][this.y] <= 1)
+    {
+    duplicateArray[this.x][this.y] += 1;
+    }
+        if((this.nextToLeftWall())||(this.obstacleOnLeft())){
+            this.direction='Up'; 
+            if (this.x != 0)
+                {placeArray[this.x-1][this.y] =2;}
+            else {placeArray[this.x][this.y] =2;}
+            //If there is an obstacle to the Left, go Up.
+
+            if((this.obstacleAbove())||(this.nextToTopWall())){this.direction='Down';
+            placeArray[this.x][this.y-1] =2;}  //If you can't go Down, go Up.
+
+            if((this.obstacleBelow())||(this.nextToBottomWall())){this.direction='Right'; 
+            placeArray[this.x][this.y+1]}  //If you can't go Up or Down, go Right.
+        }
+        return this.direction;  //Keeps you moving left or returns new direction
+    }
+
+//If you are moving up......
+    if(this.direction=='Up'){
+        if (duplicateArray[this.x][this.y] <= 1)
+    {
+    duplicateArray[this.x][this.y] += 1;
+    }
+        if((this.nextToTopWall())||(this.obstacleAbove())){
+            placeArray[this.x][this.y-1] =2;
+            this.direction='Right';//If there is an Above, go Right.
+
+            if((this.obstacleOnRight())||(this.nextToRightWall())){this.direction='Left';
+            placeArray[this.x+1][this.y]=2;}  //If you can't go Right, go Down.
+
+            if((this.obstacleOnLeft())||(this.nextToLeftWall())){this.direction='Down'; 
+            if (this.x != 0)
+            {
+            placeArray[this.x-1][this.y]=2;}
+            else {placeArray[this.x][this.y]=2;}  //If you can't go Left or Right, go Down.
+        }}
+        return this.direction;  //Keeps you moving up or returns new direction
+    }
+
+
+ //If you are moving down......
+    if(this.direction=='Down'){
+        if (duplicateArray[this.x][this.y] <= 1)
+    {
+    duplicateArray[this.x][this.y] += 1;
+    }
+        if((this.nextToBottomWall())||(this.obstacleBelow())){
+            placeArray[this.x][this.y+1]=2;
+            this.direction='Left';//If there is an obstacle Below, go Left.
+
+
+            if((this.obstacleOnLeft())||(this.nextToLeftWall())){this.direction='Right';
+            if (this.x !=0)
+                {
+            placeArray[this.x-1][this.y] = 2;}
+            else {placeArray[this.x][this.y]=2;}}  //If you can't go Left, go Right.
+
+            if((this.obstacleOnRight())||(this.nextToRightWall())){this.direction='Up'; placeArray[this.x+1][this.y]=2;}  //If you can't go Right or Left, go Up.
+        }
+        return this.direction;  //Keeps you moving down or returns new direction
+    }
+
+
+
+return this.direction;   //Your stuck, just return something.
+}
+
+    this.nextToRightWall=function(){
+        if(this.x>=grid-1) {return true;}
+        else return false;
+    }
+
+    this.nextToLeftWall=function(){
+        if(this.x<=0) {return true;}
+        else return false;
+    }
+
+    this.nextToTopWall=function(){
+        if(this.y<=0) {return true;}
+        else return false;
+    }
+
+    this.nextToBottomWall=function(){
+        if(this.y>=grid-1) {return true;}
+        else return false;
+    }
+
+    this.obstacleOnRight=function(){
+        if(!field.isVacant(this.x+1,this.y)) {return true;}
+        else return false;
+    }
+
+    this.obstacleBelow=function(){
+        if(!field.isVacant(this.x,this.y+1)) {return true;}
+        else return false;
+    }
+
+    this.obstacleAbove=function(){
+        if(!field.isVacant(this.x,this.y-1)) {return true;}
+        else return false;
+    }
+    this.obstacleOnLeft=function(){
+        if(!field.isVacant(this.x-1,this.y)) {return true;}
+        else return false;
+    }
+
+   this.moveRandom=function(){
+        var n = parseInt(Math.random()*4);
+
+        switch(n){
+            case 0: this.direction = 'Left';break;
+            case 1: this.direction='Right';break;
+            case 2: this.direction ='Up';break;
+            case 3: this.direction = 'Down';break;
+        }
+
+        return this.direction;
+
+    }
+
+    this.isAboveDirty=function(){
+        t = this.y*10+this.x-10;
+        if(t<0)return false;
+
+        if(field.tiles[t]=='dirty') {return true; placeArray[this.x][this.y] = 1; this.direction= "Up";}
+        else return false;
+    }
+    this.isBelowDirty=function(){
+        t = this.y*10+this.x+10;
+        if(t>99)return false;
+
+        if(field.tiles[t]=='dirty') {return true; placeArray[this.x][this.y] = 1; this.direction = "Down";}
+        else return false;
+    }
+
+    this.isLeftDirty=function(){
+        t = this.y*10+this.x-1;
+        if((this.x-1)<0)return false;
+
+        if(field.tiles[t]=='dirty') {return true; placeArray[this.x][this.y] = 1; this.direction = "Left";}
+        else return false;
+    }
+
+    this.isRightDirty=function(){
+        t = this.y*10+this.x+1;
+        if((this.x+1)>=10)return false;
+
+        if(field.tiles[t]=='dirty') {return true; placeArray[this.x][this.y] = 1; this.direction = "Right";}
+        else return false;
+    }
+
+}
+
+
+  </script>
+        </head>
+
+<body onload="GameSetup()">
+<canvas id=canvas height=700 width =720></canvas>
+<p id="stuff"></p>
+</body>
